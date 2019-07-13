@@ -1,0 +1,28 @@
+{
+  "name": "imager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "discordjs-command": "^0.8.5",
+    "discordjs-prompter": "^1.0.0",
+    "filesize": "^4.1.2",
+    "jimp": "^0.6.4",
+    "loglevel": "^1.6.3",
+    "moment": "^2.24.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "sharp": "^0.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
