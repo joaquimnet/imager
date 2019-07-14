@@ -2,7 +2,7 @@ const { RichEmbed } = require('discord.js');
 
 module.exports = {
   name: 'stats',
-  description: 'Show some stats about Popon.',
+  description: 'Show some stats about Imager.',
   aliases: ['status', 'info'],
   execute(message) {
     const guilds = message.client.guilds.size;
@@ -20,7 +20,7 @@ module.exports = {
         url: 'https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png?size=2048',
       },
       author: {
-        name: 'Popon Stats',
+        name: 'Imager Stats',
         url: 'https://poponbot.herokuapp.com',
         icon_url: 'https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png',
       },
