@@ -1,2 +1,0 @@
-# Manipulation Options
-- 
