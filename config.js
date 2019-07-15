@@ -32,14 +32,6 @@ prefix.apply(log.getLogger('critical'), {
   },
 });
 
-log.trace('trace');
-log.debug('debug');
-log.getLogger('critical').info('Something significant happened');
-log.log('log');
-log.info('info');
-log.warn('warn');
-log.error('error');
-
 /* discordjs-command config */
 const commandConfig = {
   prefix: '!i ',
