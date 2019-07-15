@@ -1,14 +1,15 @@
 const sharp = require('sharp');
 
-const { log } = require('../../config.js');
+// const { log } = require('../../config.js');
 const resolveImageInput = require('../../util/resolveImageInput');
+const logOperationError = require('../../util/logOperationError');
 
 module.exports = {
   name: 'saturation',
   arguments: 1,
   usage: 'saturation multiplier',
-  exec: (input, tags, degrees) => {
-    const deg = isNaN(Number(degrees)) ? 1 : Number(degrees);
+  exec: (input, tags = [''], multiplier = 1) => {
+    const deg = isNaN(Number(multiplier)) ? 1 : Number(multiplier);
     return new Promise(async (resolve, reject) => {
       let bodyBuffer;
       try {
@@ -24,13 +25,8 @@ module.exports = {
         result = await sharp(bodyBuffer)
           .modulate({ saturation: deg })
           .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Saturation] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
-        );
+      } catch (err) {
+        logOperationError(this, input, tags, [multiplier], err);
         reject('Failed to process image.');
         return;
       }
