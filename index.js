@@ -2,6 +2,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const DiscordJSCommand = require('discordjs-command');
+const { commandConfig } = require('./config');
 
 /* Image Processing */
 const Imager = require('./image_processing');
@@ -32,10 +33,15 @@ client.on('message', msg => {
 // Command System
 const commandSystem = new DiscordJSCommand(
   client,
-  require('./config').commandConfig,
+  commandConfig,
   path.join(__dirname, 'commands')
 );
-commandSystem.ListenForCommands();
+commandSystem.ListenForCommands(commands => {
+  log.info('[Discord] ' + commands.size + ' commands loaded.');
+  log.info(
+    `[Discord] DiscordCommand loaded. Prefix: [${commandConfig.prefix}]`
+  );
+});
 
 // Start Imager
 client.login(process.env.TOKEN);
