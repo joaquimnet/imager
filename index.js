@@ -1,3 +1,7 @@
+/* Node */
+const path = require('path');
+const fs = require('fs');
+
 /* Discord */
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -10,7 +14,6 @@ const Imager = require('./image_processing');
 /* Util */
 const moment = require('moment');
 const { log } = require('./config');
-const path = require('path');
 
 client.on('ready', () => {
   log.info(`[Discord] Logged in as ${client.user.tag}!`);
@@ -44,4 +47,14 @@ commandSystem.ListenForCommands(commands => {
 });
 
 // Start Imager
-client.login(process.env.TOKEN);
+if (process.env.NODE_END === 'production') {
+  client.login(process.env.TOKEN);
+} else {
+  try {
+    client.login(require('./TOKEN.json').TOKEN); // eslint-disable-line node/no-unpublished-require
+  } catch (err) {
+    log.getLogger('critical').error('TOKEN.json not found!');
+    fs.writeFileSync('./TOKEN.json', '{\n  "TOKEN": "TOKEN_GOES_HERE"\n}', { encoding: 'utf8' });
+    throw new Error('TOKEN.json not found! Can\'t start discord bot.');
+  }
+}

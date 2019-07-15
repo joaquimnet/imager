@@ -1,7 +1,6 @@
 {
   "env": {
     "verbose": true,
-    "NODE_ENV": "development",
-    "TOKEN": "NTk5MjU3OTUyMzQzNDI1MDUy.XSimgA.dpnZU5lsrGHftgYZQgOxQpaIyno"
+    "NODE_ENV": "development"
   }
 }
