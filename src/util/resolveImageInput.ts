@@ -1,26 +1,20 @@
-const request = require('request-promise-native');
+import request from "request-promise-native";
 
-module.exports = input => {
-  return new Promise(async (resolve, reject) => {
-    let bodyBuffer;
-    if (typeof input === 'string') {
+export function resolveImageInput(input: string | Buffer) {
+  return new Promise<Buffer>((resolve, reject) => {
+    if (typeof input === "string") {
       // must be an url, right?
       // Try to fetch image
-      try {
-        bodyBuffer = await request({ url: input, encoding: null });
-      } catch {
-        reject('Failed to fetch image.');
-        return;
-      }
+      request({ url: input, encoding: null })
+        .then((bodyBuffer: Buffer) => resolve(bodyBuffer))
+        .catch((err: Error) => reject("Failed to fetch image."));
     } else if (Buffer.isBuffer(input)) {
       // must be a image buffer, right?
-      bodyBuffer = input;
+      resolve(input);
     } else {
       // invalid input
-      reject('Invalid input');
+      reject("Invalid input");
       return;
     }
-    // Resolve with buffer
-    resolve(bodyBuffer);
   });
-};
+}
