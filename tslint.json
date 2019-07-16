@@ -4,9 +4,16 @@
     "./node_modules/tslint-eslint-rules/dist/rules"
   ],
   "rules": {
-    "no-console": false,
+    "no-console": true,
+    "object-literal-sort-keys": false,
     "eofline": {
       "severity": "warn"
     }
+  },
+  "linterOptions": {
+    "exclude": [
+      "*.json",
+      "**/*.json"
+    ]
   }
 }
