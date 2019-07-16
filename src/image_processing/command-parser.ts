@@ -1,31 +1,41 @@
-const loop = require('../util/loop');
+import { loop } from "../util/loop";
 
-const validOperations = require('./operations');
-const validTags = require('./tags');
+import { IOperation, operations } from "./operations";
+import { ITag, tagMap } from "./tags";
 
-module.exports = command => {
-  const operations = [];
-  const tags = [];
+interface INewOperation {
+  operation: string;
+  arguments: string[];
+}
+
+export function commandParser(command: string): [INewOperation[], ITag[]] {
+  const parsedOperations: INewOperation[] = [];
+  const parsedTags: ITag[] = [];
   // Split at spaces
   const argArray = command.split(/ +/);
   argArray.forEach((v, index) => {
     const potentialOperation = v.toLowerCase();
     // If this is a valid operation registered through operations.js
-    if (validOperations.has(potentialOperation)) {
-      const newOperation = { operation: potentialOperation, arguments: [] };
+    if (operations.has(potentialOperation)) {
+      const newOperation: INewOperation = {
+        arguments: [],
+        operation: potentialOperation,
+      };
+
       // Gather necessary arguments
-      loop(validOperations.get(potentialOperation)['arguments'], i => {
+      const argumentCount = (operations.get(potentialOperation) as IOperation)
+        .arguments;
+
+      loop(argumentCount, (i) => {
         newOperation.arguments.push(argArray[index + i + 1]);
       });
-      operations.push(newOperation);
+
+      parsedOperations.push(newOperation);
     }
     // If this is a valid tag name, push said tag to the tag array
-    if (validTags.has(potentialOperation)) {
-      tags.push({
-        name: potentialOperation,
-        info: validTags.get(potentialOperation),
-      });
+    if (tagMap.has(potentialOperation)) {
+      parsedTags.push(tagMap.get(potentialOperation) as ITag);
     }
   });
-  return [operations, tags];
-};
+  return [parsedOperations, parsedTags];
+}
