@@ -1,10 +1,10 @@
-const { RichEmbed } = require('discord.js');
+import { Message, RichEmbed } from "discord.js";
 
 module.exports = {
-  name: 'stats',
-  description: 'Show some stats about Imager.',
-  aliases: ['status', 'info'],
-  execute(message) {
+  name: "stats",
+  description: "Show some stats about Imager.",
+  aliases: ["status", "info"],
+  execute(message: Message) {
     const guilds = message.client.guilds.size;
     const users = message.client.users.size;
     const uptime = message.client.uptime;
@@ -14,35 +14,37 @@ module.exports = {
     const embedData = {
       color: 13044507,
       footer: {
-        text: 'Version ' + require('../package.json').version,
+        text: "Version " + require("../../package.json").version,
       },
       thumbnail: {
-        url: 'https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png?size=2048',
+        url:
+          "https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png?size=2048",
       },
       author: {
-        name: 'Imager Stats',
-        url: 'https://poponbot.herokuapp.com',
-        icon_url: 'https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png',
+        name: "Imager Stats",
+        url: "https://github.com/joaquimnet/imager",
+        icon_url:
+          "https://cdn.discordapp.com/avatars/599257952343425052/113eceebc1864486f825776d23ca9e74.png",
       },
       fields: [
         {
-          name: 'Servers',
-          value: '' + guilds,
+          name: "Servers",
+          value: "" + guilds,
           inline: true,
         },
         {
-          name: 'Users',
-          value: '' + users,
+          name: "Users",
+          value: "" + users,
           inline: true,
         },
         {
-          name: 'Uptime',
-          value: '' + uptimeFormatted,
+          name: "Uptime",
+          value: "" + uptimeFormatted,
           inline: true,
         },
         {
-          name: 'Ping',
-          value: ping + 'ms',
+          name: "Ping",
+          value: ping + "ms",
           inline: true,
         },
       ],

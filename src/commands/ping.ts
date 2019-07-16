@@ -1,7 +1,9 @@
+import { Message } from "discord.js";
+
 module.exports = {
-	name: 'ping',
-	description: 'Ping!',
-	execute(message) {
-		message.channel.send('Pong.');
-	},
+  name: "ping",
+  description: "Ping!",
+  execute(message: Message) {
+    message.channel.send("Pong.");
+  },
 };
