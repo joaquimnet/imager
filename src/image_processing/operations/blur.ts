@@ -1,44 +1,36 @@
-const sharp = require('sharp');
+import Util from "../../util/";
+import { ITag } from "../tags";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
+
+const blurOptions = { weak: 0.9, medium: 2, strong: 5, extreme: 10 };
 
 module.exports = {
-  name: 'blur',
+  name: "blur",
   arguments: 1,
-  usage: 'blur [weak/medium/strong/extreme]',
-  exec: (input, tags, strength) => {
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
+  usage: "blur [weak/medium/strong/extreme]",
+  exec: (input: Buffer | string, tags: ITag[], strength: string) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Validating the input
+      if (!["weak", "medium", "strong", "extreme"].includes(strength)) {
+        strength = "medium";
       }
 
-      // Get blur strength
-      const blurOptions = { weak: 0.9, medium: 2, strong: 5, extreme: 10 };
-      const blurStrength = blurOptions[strength] || 0.9;
+      // Arguments for sharp().blur()
+      const args = [blurOptions[strength]];
 
-      // Try to blur the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .blur(blurStrength)
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Blur] Failed to process image. ' + typeof input === 'string'
-            ? '>> ' + input
-            : null
-        );
-        reject('Failed to process image.');
-        return;
-      }
-
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Resolve exec with Buffer or reject
+      processImage(input, "blur", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Rotate", input, tags, [strength], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

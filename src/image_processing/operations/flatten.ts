@@ -1,49 +1,44 @@
-const sharp = require('sharp');
-const colorString = require('color-string');
+import Joi from "@hapi/joi";
+import colorString from "color-string";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import Util from "../../util/";
+import { ITag } from "../tags";
+
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'flatten',
+  name: "flatten",
   arguments: 1,
-  usage: 'flatten color',
-  exec: (input, tags, color) => {
-    return new Promise(async (resolve, reject) => {
-      // Resolve input
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "flatten color",
+  exec: (input: Buffer | string, tags: ITag[], colorInput: string) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Validating the input
+      const validation = Joi.object()
+        .required()
+        .validate(colorString.get(colorInput));
 
-      // Try to flatten the image
-      let result;
-      try {
-        if (colorString.get(color) === null) {
-          result = await sharp(bodyBuffer).toBuffer({
-            resolveWithObject: true,
-          });
-        } else {
-          result = await sharp(bodyBuffer)
-            .flatten({ background: color })
-            .toBuffer({ resolveWithObject: true });
-        }
-      } catch {
-        log.error(
-          '[Imager/Flatten] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
+      if (validation.error !== null) {
+        reject(
+          Util.buildValidationErrorObject("flatten", "color", validation.error),
         );
-        reject('Failed to process image.');
         return;
       }
 
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Arguments for sharp().flatten() ~~ validation passed, this will get parsed by sharp
+      const args = [{ background: colorInput }];
+
+      // Resolve exec with Buffer or reject
+      processImage(input, "flatten", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Flatten", input, tags, [colorInput], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

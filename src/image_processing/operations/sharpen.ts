@@ -1,41 +1,29 @@
-const sharp = require('sharp');
+import Util from "../../util/";
+import { ITag } from "../tags";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'sharpen',
+  name: "sharpen",
   arguments: 0,
-  usage: 'sharpen',
-  exec: input => {
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "sharpen",
+  exec: (input: Buffer | string, tags: ITag[]) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Arguments for sharp().sharpen()
+      const args: any = [1.2, 1, 1.5];
 
-      // Try to sharpen the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .sharpen(1.2, 1, 1.5)
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Sharpen] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
-        );
-        reject('Failed to process image.');
-        return;
-      }
-
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Resolve exec with Buffer or reject
+      processImage(input, "sharpen", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Sharpen", input, tags, [], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

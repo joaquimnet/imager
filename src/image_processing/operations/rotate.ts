@@ -1,43 +1,45 @@
-const sharp = require('sharp');
+import Joi from "@hapi/joi";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
-const logOperationError = require('../../util/logOperationError');
+import Util from "../../util/";
+import { ITag } from "../tags";
+
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'rotate',
+  name: "rotate",
   arguments: 1,
-  usage: 'rotate degrees',
-  exec: (input, tags = [''], degrees = 0) => {
-    return new Promise((resolve, reject) => {
+  usage: "rotate degrees",
+  exec: (input: Buffer | string, tags: ITag[], degreesInput: string) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
       // Validating the input
-      let inputDegrees = Number(degrees);
-      if (isNaN(inputDegrees)) {
-        inputDegrees = 0;
-      } else {
-        inputDegrees = Math.floor(inputDegrees);
-        if (inputDegrees > 1000 || inputDegrees < -1000) {
-          inputDegrees = 0;
-        }
+      const validation = Joi.number()
+        .required()
+        .min(-1000)
+        .max(1000)
+        .validate(degreesInput);
+
+      if (validation.error !== null) {
+        reject(
+          Util.buildValidationErrorObject("rotate", "degrees", validation.error),
+        );
+        return;
       }
 
-      // Resolve the input
-      resolveImageInput(input)
-        .then(bodyBuffer => {
-          // Try to rotate the image
-          return sharp(bodyBuffer)
-            .rotate(inputDegrees, { background: 'rgba(0,0,0,0)' })
-            .toBuffer({ resolveWithObject: true });
+      // Arguments for sharp().rotate()
+      const args = [validation.value, { background: "rgba(0,0,0,0)" }];
+
+      // Resolve exec with Buffer or reject
+      processImage(input, "rotate", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
         })
-        .then(result => {
-          // Resolve promise with {data: The image buffer, info: Info about the image}
-          return resolve(result);
-        })
-        .catch(err => {
-          logOperationError('Rotate', input, tags, [degrees], err);
+        .catch((err: Error) => {
+          Util.logOperationError("Rotate", input, tags, [degreesInput], err);
           reject(err);
           return;
         });
     });
   },
-};
+} as IOperation;

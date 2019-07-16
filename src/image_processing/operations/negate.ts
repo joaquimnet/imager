@@ -1,41 +1,29 @@
-const sharp = require('sharp');
+import Util from "../../util/";
+import { ITag } from "../tags";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'negate',
+  name: "negate",
   arguments: 0,
-  usage: 'negate',
-  exec: input => {
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "negate",
+  exec: (input: Buffer | string, tags: ITag[]) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Arguments for sharp().negate()
+      const args: any = [];
 
-      // Try to negate the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .negate()
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Negate] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
-        );
-        reject('Failed to process image.');
-        return;
-      }
-
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Resolve exec with Buffer or reject
+      processImage(input, "negate", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Negate", input, tags, [], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

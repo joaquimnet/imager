@@ -1,41 +1,29 @@
-const sharp = require('sharp');
+import Util from "../../util/";
+import { ITag } from "../tags";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'flop',
+  name: "flop",
   arguments: 0,
-  usage: 'flop',
-  exec: input => {
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "flop",
+  exec: (input: Buffer | string, tags: ITag[]) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Arguments for sharp().flop()
+      const args: any = [];
 
-      // Try to flop the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .flop()
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Flop] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
-        );
-        reject('Failed to process image.');
-        return;
-      }
-
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Resolve exec with Buffer or reject
+      processImage(input, "flop", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Flop", input, tags, [], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

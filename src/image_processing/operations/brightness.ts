@@ -1,42 +1,51 @@
-const sharp = require('sharp');
+import Joi from "@hapi/joi";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import Util from "../../util/";
+import { ITag } from "../tags";
+
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'brightness',
+  name: "brightness",
   arguments: 1,
-  usage: 'brightness multiplier',
-  exec: (input, tags, degrees) => {
-    const deg = isNaN(Number(degrees)) ? 1 : Number(degrees);
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "brightness multiplier",
+  exec: (input: Buffer | string, tags: ITag[], multiplierInput: string) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Validating the input
+      const validation = Joi.number()
+        .required()
+        .min(0)
+        .max(5)
+        .validate(multiplierInput);
 
-      // Try to brightness the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .modulate({ brightness: deg })
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Brightness] Failed to process image. ' + typeof input ===
-            'string'
-            ? '>> ' + input
-            : null
+      if (validation.error !== null) {
+        reject(
+          Util.buildValidationErrorObject("brightness", "multiplier", validation.error),
         );
-        reject('Failed to process image.');
         return;
       }
 
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Arguments for sharp().modulate()
+      const args = [{ brightness: validation.value }];
+
+      // Resolve exec with Buffer or reject
+      processImage(input, "modulate", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError(
+            "Brightness",
+            input,
+            tags,
+            [multiplierInput],
+            err,
+          );
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;

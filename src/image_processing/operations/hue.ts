@@ -1,41 +1,45 @@
-const sharp = require('sharp');
+import Joi from "@hapi/joi";
 
-const { log } = require('../../config.js');
-const resolveImageInput = require('../../util/resolveImageInput');
+import Util from "../../util/";
+import { ITag } from "../tags";
+
+import { ISharpResult } from "..";
+import { IOperation } from "../operations";
+import { processImage } from "../processImage";
 
 module.exports = {
-  name: 'hue',
+  name: "hue",
   arguments: 1,
-  usage: 'hue degrees',
-  exec: (input, tags, degrees) => {
-    const deg = isNaN(Number(degrees)) ? 0 : Number(degrees);
-    return new Promise(async (resolve, reject) => {
-      let bodyBuffer;
-      try {
-        bodyBuffer = await resolveImageInput(input);
-      } catch (err) {
-        reject(err);
-        return;
-      }
+  usage: "hue multiplier",
+  exec: (input: Buffer | string, tags: ITag[], degreesInput: string) => {
+    return new Promise<ISharpResult>((resolve, reject) => {
+      // Validating the input
+      const validation = Joi.number()
+        .required()
+        .min(-1000)
+        .max(1000)
+        .validate(degreesInput);
 
-      // Try to hue the image
-      let result;
-      try {
-        result = await sharp(bodyBuffer)
-          .modulate({ hue: deg })
-          .toBuffer({ resolveWithObject: true });
-      } catch {
-        log.error(
-          '[Imager/Hue] Failed to process image. ' + typeof input === 'string'
-            ? '>> ' + input
-            : null
+      if (validation.error !== null) {
+        reject(
+          Util.buildValidationErrorObject("hue", "degrees", validation.error),
         );
-        reject('Failed to process image.');
         return;
       }
 
-      // Resolve promise with {data: The image buffer, info: Info about the image}
-      resolve(result);
+      // Arguments for sharp().modulate()
+      const args = [{ hue: validation.value }];
+
+      // Resolve exec with Buffer or reject
+      processImage(input, "modulate", args)
+        .then((result: ISharpResult) => {
+          resolve(result);
+        })
+        .catch((err: Error) => {
+          Util.logOperationError("Hue", input, tags, [degreesInput], err);
+          reject(err);
+          return;
+        });
     });
   },
-};
+} as IOperation;
