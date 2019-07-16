@@ -2,5 +2,10 @@
   "env": {
     "verbose": true,
     "NODE_ENV": "development"
-  }
+  },
+  "watch": [
+    "src"
+  ],
+  "ext": "ts",
+  "exec": "ts-node --transpile-only src/index.ts"
 }

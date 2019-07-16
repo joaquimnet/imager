@@ -1,0 +1,12 @@
+{
+  "extends": "tslint:recommended",
+  "rulesDirectory": [
+    "./node_modules/tslint-eslint-rules/dist/rules"
+  ],
+  "rules": {
+    "no-console": false,
+    "eofline": {
+      "severity": "warn"
+    }
+  }
+}
