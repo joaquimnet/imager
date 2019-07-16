@@ -1,21 +1,21 @@
 /* Node */
-const path = require('path');
-const fs = require('fs');
+import path from "path";
 
 /* Discord */
-const Discord = require('discord.js');
+import Discord from "discord.js";
 const client = new Discord.Client();
-const DiscordJSCommand = require('discordjs-command');
-const { commandConfig } = require('./config');
+// Leaving command like this until I write a definition file
+// tslint:disable-next-line: no-var-requires
+const DiscordJSCommand = require("discordjs-command");
+import { commandConfig, log, TOKEN } from "./config";
 
 /* Image Processing */
-const Imager = require('./image_processing');
+import { Imager } from "./image_processing/";
 
 /* Util */
-const moment = require('moment');
-const { log } = require('./config');
+import moment from "moment";
 
-client.on('ready', () => {
+client.on("ready", () => {
   log.info(`[Discord] Logged in as ${client.user.tag}!`);
 });
 
@@ -23,12 +23,12 @@ client.on('ready', () => {
 Imager(client);
 
 // Debugging
-client.on('message', msg => {
-  if (msg.channel.id === '599309497911083176') {
+client.on("message", (msg) => {
+  if (msg.channel.id === "600423584694796298") {
     log.info(
-      `[Console][${moment().format('HH:mm:ss')}] ${
+      `[Console][${moment().format("HH:mm:ss")}] ${
         msg.author.username
-      }: ${msg.content.replace(/\n/g, '\n           ')}`
+      }: ${msg.content.replace(/\n/g, "\n           ")}`,
     );
   }
 });
@@ -37,24 +37,19 @@ client.on('message', msg => {
 const commandSystem = new DiscordJSCommand(
   client,
   commandConfig,
-  path.join(__dirname, 'commands')
+  path.join(__dirname, "commands"),
 );
-commandSystem.ListenForCommands(commands => {
-  log.info('[Discord] ' + commands.size + ' commands loaded.');
+commandSystem.ListenForCommands((commands: Map<string, object>) => {
+  log.info("[Discord] " + commands.size + " commands loaded.");
   log.info(
-    `[Discord] DiscordCommand loaded. Prefix: [${commandConfig.prefix}]`
+    `[Discord] DiscordCommand loaded. Prefix: [${commandConfig.prefix}]`,
   );
 });
 
 // Start Imager
-if (process.env.NODE_END === 'production') {
-  client.login(process.env.TOKEN);
-} else {
-  try {
-    client.login(require('./TOKEN.json').TOKEN); // eslint-disable-line node/no-unpublished-require
-  } catch (err) {
-    log.getLogger('critical').error('TOKEN.json not found!');
-    fs.writeFileSync('./TOKEN.json', '{\n  "TOKEN": "TOKEN_GOES_HERE"\n}', { encoding: 'utf8' });
-    throw new Error('TOKEN.json not found! Can\'t start discord bot.');
-  }
+try {
+  client.login(TOKEN);
+} catch (err) {
+  log.getLogger("critical").error("Error trying to log bot into discord!");
+  throw err;
 }
