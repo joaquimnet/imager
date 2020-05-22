@@ -22,7 +22,7 @@
     "discordjs-command": "^0.9.0",
     "discordjs-prompter": "^1.0.0",
     "filesize": "^4.1.2",
-    "jimp": "^0.6.4",
+    "jimp": "^0.12.0",
     "loglevel": "^1.6.3",
     "loglevel-plugin-prefix": "^0.8.4",
     "moment": "^2.24.0",
