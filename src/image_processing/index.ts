@@ -29,7 +29,7 @@ export interface IValidationError {
 export function Imager(client: Client) {
   client.on("message", async (msg: Message) => {
     if (mentionsMe(msg) && hasValidAttachments(msg)) {
-      const att: MessageAttachment = msg.attachments.first();
+      const att: MessageAttachment = msg.attachments.first()!;
       const [operationsToPerform, tags] = commandParser(msg.content);
       if (operationsToPerform.length <= 0) {
         log.debug(

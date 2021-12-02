@@ -1,9 +1,10 @@
-import { Message } from "discord.js";
+import { Command, Permission } from 'sensum';
 
-module.exports = {
-  name: "image",
-  description: "Information about image transformation.",
-  execute(message: Message) {
-    message.channel.send(":construction: WIP");
+export default new Command({
+  name: 'image',
+  description: 'Information about image transformation.',
+  permission: Permission.USER,
+  run(bot, message) {
+    return message.channel.send(':construction: WIP');
   },
-};
+});
